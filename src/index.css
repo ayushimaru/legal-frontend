@@ -1,13 +1,100 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Font family */
+  --lawBook-font-display: 'Helvetica', sans-serif;
+  --lawBook-font-body: 'Noto Sans', sans-serif;
+
+  /* Font sizes */
+  --lawBook-font-size-900: 36px;
+  --lawBook-leading-900: 46px;
+  --lawBook-font-size-800: 30px;
+  --lawBook-leading-800: 39px;
+  --lawBook-font-size-700: 24px;
+  --lawBook-leading-700: 32px;
+  --lawBook-font-size-600: 20px;
+  --lawBook-leading-600: 26px;
+  --lawBook-font-size-500: 18px;
+  --lawBook-leading-500: 24px;
+  --lawBook-font-size-400: 16px;
+  --lawBook-leading-400: 20px;
+  --lawBook-font-size-300: 14px;
+  --lawBook-leading-300: 20px;
+  --lawBook-font-size-200: 12px;
+  --lawBook-leading-200: 18px;
+  --lawBook-font-size-100: 10px;
+  --lawBook-leading-100: 15px;
+
+  /* Colors */
+  --lawBook-gray-900: #000000;
+  --lawBook-gray-800: rgb(34, 34, 34);
+  --lawBook-gray-700: rgb(70, 70, 70);
+  --lawBook-gray-500: #616161;
+  --lawBook-gray-400: #9E9E9E;
+  --lawBook-gray-300: #CECECE;
+  --lawBook-gray-200: #E0E0E0;
+  --lawBook-gray-100: #F5F5F5;
+  --lawBook-gray-10: #C0C0C0;
+  --lawBook-gray-75: #FEFEFE;
+  --lawBook-gray-50: #ffffff;
+
+  --lawBook-purple-500: #613D86;
+  --lawBook-purple-400: #76539A;
+  --lawBook-purple-200: #D3C6DD;
+  --lawBook-purple-100: #EDE8F1;
+
+  --lawBook-blue-500: #2E5CA3;
+  --lawBook-blue-400: #4973B4;
+  --lawBook-blue-200: #B6CCE7;
+  --lawBook-blue-100: #E2EBF5;
+
+  --lawBook-teal-500: #2E9380;
+  --lawBook-teal-400: #4EAE9C;
+  --lawBook-teal-200: #BDDDD4;
+  --lawBook-teal-100: #E5F1EE;
+
+  --lawBook-green-500: #358327;
+  --lawBook-green-400: #5FA653;
+  --lawBook-green-300: #CEDC85;
+  --lawBook-green-200: #EBF1CE;
+  --lawBook-green-100: #EBF1CE;
+
+  --lawBook-yellow-500: #B57728;
+  --lawBook-yellow-400: #D1903E;
+  --lawBook-yellow-200: #ECE089;
+  --lawBook-yellow-100: #F7F3D0;
+
+  --lawBook-orange-500: #BF501F;
+  --lawBook-orange-400: #D66736;
+  --lawBook-orange-200: #F1C49C;
+  --lawBook-orange-100: #F9E7D7;
+
+  --lawBook-gold-400: #F1C644;
+  --lawBook-red-400: #d93025;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+html {
+  letter-spacing: 0 !important;
+  font-weight: 500 !important;
+  font-family: var(--lawBook-font-body);
+}
+body{
+  font-family: var(--lawBook-font-body);
+}
+.flex-2 {
+  flex: 2;
+}
+.ant-table-thead tr th {
+  background-color: #cccccc !important; /* Replace with your desired color */
+  color: #fff; /* Set the text color for better contrast */
+}
+.ant-pagination .ant-pagination-item-active {
+  border-color: #000000 !important;
+}
+.ant-pagination .ant-pagination-item-active a {
+  color: #000000 !important;
+  font-weight: 700 !important;
+  font-size: 16px !important;
 }
