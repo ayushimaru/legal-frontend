@@ -63,7 +63,7 @@ const ClientAdd = () => {
         phone: formValues.contactPhone,
       },
     })
-      .then((response) => navigate("clients"))
+      .then((response) => navigate("/clients"))
       .catch((error) => "");
   };
 
@@ -327,7 +327,7 @@ const ClientAdd = () => {
                 Phone
               </label>
               <input
-                type="email"
+                type="text"
                 name="contactPhone"
                 value={formValues.contactPhone}
                 onChange={handleChange}
