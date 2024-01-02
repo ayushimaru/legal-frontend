@@ -11,15 +11,32 @@ export class CustomerService {
     /**
      * Get all customers
      * @param authToken authToken
-     * @param status Status (0: inactive, 1: active (default), 2: deleted, 3: active+inactive, 4: all)
+     * @param status Status (0: Inactive, 1: Active (default), 2: Deleted, -1: None Deleted, -2: All)
+     * @param name name
+     * @param contactName Contact person name
+     * @param customerCode Customer Code
+     * @param perPage Per page
+     * @param pageNumber Page Number
+     * @param sortBy Sort by (column name)
+     * @param order Order by (asc, desc)
      * @returns any Successful operation
      * @throws ApiError
      */
     public static getApiV1Customer(
-        authToken: any,
+        authToken: string,
         status?: number,
+        name?: string,
+        contactName?: string,
+        customerCode?: string,
+        perPage?: string,
+        pageNumber?: string,
+        sortBy?: string,
+        order?: string,
     ): CancelablePromise<{
+        current_page?: number;
         data?: Array<Record<string, any>>;
+        per_page?: number;
+        total?: number;
     }> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -29,6 +46,13 @@ export class CustomerService {
             },
             query: {
                 'status': status,
+                'name': name,
+                'contact_name': contactName,
+                'customer_code': customerCode,
+                'per_page': perPage,
+                'page_number': pageNumber,
+                'sort_by': sortBy,
+                'order': order,
             },
         });
     }

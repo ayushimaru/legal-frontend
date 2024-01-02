@@ -11,19 +11,42 @@ export class UserService {
     /**
      * Get all Users
      * @param authToken Auth Token
+     * @param status Status (0: Inactive, 1: Active (default), 2: Deleted, -1: None Deleted, -2: All)
+     * @param role Status (1: admin, 2: operation manager, 3: employee, 4: all (default))
+     * @param perPage Per page
+     * @param pageNumber Page Number
+     * @param sortBy Sort by (column name)
+     * @param order Order by (asc, desc)
      * @returns any Successful operation
      * @throws ApiError
      */
     public static getApiV1User(
         authToken: string,
+        status?: number,
+        role?: number,
+        perPage?: string,
+        pageNumber?: string,
+        sortBy?: string,
+        order?: string,
     ): CancelablePromise<{
+        current_page?: number;
         data?: Array<Record<string, any>>;
+        per_page?: number;
+        total?: number;
     }> {
         return __request(OpenAPI, {
             method: 'GET',
             url: '/api/v1/user',
             headers: {
                 'authToken': authToken,
+            },
+            query: {
+                'status': status,
+                'role': role,
+                'per_page': perPage,
+                'page_number': pageNumber,
+                'sort_by': sortBy,
+                'order': order,
             },
         });
     }
@@ -135,7 +158,6 @@ export class UserService {
         requestBody: {
             aadhar_card?: string;
             address?: string;
-            customer_code?: string;
             email?: string;
             first_name?: string;
             last_name?: string;

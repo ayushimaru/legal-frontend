@@ -19,14 +19,12 @@ const Login = () => {
   const customerCode = new URLSearchParams(location.search).get("cc");
 
   useEffect(() => {
-    console.log("heiiii", customerCode);
     if(customerCode) {
     window.sessionStorage.setItem("customerCode", customerCode);
     }
   }, [customerCode]);
 
   const handleLogin = async () => {
-    console.log(customerCode);
     if(formValues?.customerCodeValue) {
         window.sessionStorage.setItem("customerCode", formValues.customerCodeValue);
     }
@@ -50,7 +48,6 @@ const Login = () => {
     e.preventDefault();
     setIsSubmit(true);
     setFormErrors(validate(formValues));
-    console.log(formErrors);
     if(Object.keys(formErrors).length !== 0) return;
     handleLogin();
   };
@@ -80,12 +77,9 @@ const Login = () => {
   }, [formErrors, isSubmit]);
 
   const validate = (values) => {
-    console.log("heyy")
     // const errors = {};
     const emailRegex = /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/i;
-    console.log(values)
     if (!values.email) {
-        console.log("ehehh")
       formErrors.email = "Email is required";
     } else if (!emailRegex.test(values.email)) {
         formErrors.email = "Email is not valid";

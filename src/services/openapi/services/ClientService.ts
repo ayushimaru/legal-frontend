@@ -12,14 +12,35 @@ export class ClientService {
      * Get all Clients
      * @param authToken Auth Token
      * @param customerCode Customer code
+     * @param status Status (0: Inactive, 1: Active (default), 2: Deleted, -1: None Deleted, -2: All)
+     * @param clientType Client Type (1: individual, 2: corporate, 3: All (default))
+     * @param name Name
+     * @param contactPersonName Contact Person Name
+     * @param addedBy added_by
+     * @param perPage Per page
+     * @param pageNumber Page Number
+     * @param sortBy Sort by (column name)
+     * @param order Order by (asc, desc)
      * @returns any Successful operation
      * @throws ApiError
      */
     public static getApiV1Client(
         authToken: string,
         customerCode: string,
+        status?: number,
+        clientType?: number,
+        name?: string,
+        contactPersonName?: string,
+        addedBy?: string,
+        perPage?: string,
+        pageNumber?: string,
+        sortBy?: string,
+        order?: string,
     ): CancelablePromise<{
+        current_page?: number;
         data?: Array<Record<string, any>>;
+        per_page?: number;
+        total?: number;
     }> {
         return __request(OpenAPI, {
             method: 'GET',
@@ -29,6 +50,15 @@ export class ClientService {
             },
             query: {
                 'customer_code': customerCode,
+                'status': status,
+                'client_type': clientType,
+                'name': name,
+                'contact_person_name': contactPersonName,
+                'added_by': addedBy,
+                'per_page': perPage,
+                'page_number': pageNumber,
+                'sort_by': sortBy,
+                'order': order,
             },
         });
     }
@@ -142,16 +172,15 @@ export class ClientService {
         authToken: string,
         requestBody: {
             address?: string;
-            client_type: number;
-            contact_person: {
+            client_type?: number;
+            contact_person?: {
                 aadhar_card?: string;
                 email: string;
                 name: string;
                 phone: string;
             };
-            customer_code: string;
-            name: string;
-            status: number;
+            name?: string;
+            status?: number;
         },
     ): CancelablePromise<any> {
         return __request(OpenAPI, {

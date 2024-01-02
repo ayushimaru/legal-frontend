@@ -1,5 +1,5 @@
 import Cookies from "js-cookie";
-import { OpenAPI, LoginService, ClientService, CaseService } from "../openapi";
+import { OpenAPI, LoginService, ClientService, CaseService, DocumentService, NoteService } from "../openapi";
 
 const { postApiV1Client } = ClientService;
 const {
@@ -10,6 +10,8 @@ const {
 } = LoginService;
 const { getApiV1Client, getApiV1Client1, putApiV1Client } = ClientService;
 const { getApiV1Case, postApiV1Case, getApiV1Case1, putApiV1Case } = CaseService;
+const { getApiV1Document, postApiV1Document, getApiV1AccessDocument, getApiV1Document1, putApiV1Document, deleteApiV1Document} = DocumentService;
+const { getApiV1Note, postApiV1Note, putApiV1Note, deleteApiV1Note } = NoteService;
 
 OpenAPI.BASE = "http://15.206.124.145";
 const customerCode = window.sessionStorage.getItem("customerCode") || "";
@@ -17,7 +19,6 @@ const authToken = Cookies.get("authToken") || "";
 const resetPwdToken = Cookies.get("resetPwdKey") || "";
 
 export const loginUser = async (requestBody: any) => {
-  console.log(requestBody);
   try {
     const user = await postApiV1Login(requestBody);
     return user;
@@ -49,7 +50,6 @@ export const createNewClient = async (requestBody: any) => {
 };
 export const updateClient = async (id: string, requestBody: any) => {
   try {
-    requestBody.customer_code = customerCode;
     const client = await putApiV1Client(id, authToken, requestBody);
     return client;
   } catch (error: any) {
@@ -76,7 +76,6 @@ export const logoutUserApi = async () => {
 };
 //forgot password
 export const forgotPassword = async (email: string) => {
-  console.log(email);
   try {
     const data = await getApiV1ForgotPassword(email);
     return data;
@@ -128,9 +127,115 @@ export const getCaseByID = async (id: any) => {
 
 export const updateCase = async (id: string, requestBody: any) => {
   try {
-    requestBody.customer_code = customerCode;
     const cases = await putApiV1Case(id, authToken, requestBody);
     return cases;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
+// get all cases
+export const getAllDocuments = async (pageData: any) => {
+  try {
+    const perPage = pageData.perPage;
+    const caseId= pageData.caseId || undefined;
+    const addedBy= pageData.addedBy || undefined;
+    const pageNumber = pageData.pageNumber;
+    const data = await getApiV1Document(
+      Cookies.get("authToken") || "",
+      window.sessionStorage.getItem("customerCode") || "",
+      caseId,
+      addedBy,
+      perPage,
+      pageNumber,
+    );
+    return data;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
+export const addNewDocument = async (formData: any) => {
+  try {
+    formData.customer_code = customerCode;
+    const data = await postApiV1Document(authToken, formData);
+    return data;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
+export const getAccessDocument = async (id: any) => {
+  try {
+    const data = await getApiV1AccessDocument(id, authToken);
+    return data;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+export const getDocumentById = async (id: any) => {
+  try {
+    const data = await getApiV1Document1(id, authToken);
+    return data;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+export const updateDocumentById = async (id: any, formData: any) => {
+  try {
+    const data = await putApiV1Document(id, authToken, formData);
+    return data;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+export const deleteDocument = async (id: any) => {
+  try {
+    const data = await deleteApiV1Document(id, authToken);
+    return data;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+// get all notes
+export const getAllNotes = async (pageData: any) => {
+  try {
+    const caseId= pageData.caseId;
+    const data = await getApiV1Note(
+      Cookies.get("authToken") || "",
+      window.sessionStorage.getItem("customerCode") || "",
+      caseId,
+    );
+    return data;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+
+// get all notes
+export const updateNote = async (id: any, requestBody: any) => {
+  try {
+    const data = await putApiV1Note(id, authToken, requestBody);
+    return data;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+// deleteNote
+export const deleteNote = async (id: any) => {
+  try {
+    const data = await deleteApiV1Note(id, authToken);
+    return data;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};
+// deleteNote
+export const createNewNote = async (requestBody: any) => {
+  try {
+    requestBody.customer_code = customerCode;
+    const data = await postApiV1Note(authToken, requestBody);
+    return data;
   } catch (error: any) {
     throw new Error(error);
   }

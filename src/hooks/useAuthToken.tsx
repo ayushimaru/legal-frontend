@@ -19,7 +19,6 @@ const useAuthToken = () => {
 
   const removeAuthToken = () => {
     // Remove token logic, clear it from local storage or revoke it on the server
-    console.log("he")
     Cookies.remove('authToken');
     window.sessionStorage.removeItem('customerCode');
     setToken(null);

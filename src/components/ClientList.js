@@ -1,17 +1,19 @@
 import { useState, useEffect } from "react";
-import { getClients } from "../services/api/useUser";
-import { useNavigate, Link } from "react-router-dom";
+import { getClients, updateClient } from "../services/api/useUser";
+import { useNavigate } from "react-router-dom";
 import '../index.css'; 
 import  nodata  from "../assets/nodata.svg";
-import { Table, Pagination, Space } from "antd";
+import { Table, Space } from "antd";
+import {
+  DeleteFilled, EditFilled
+} from '@ant-design/icons';
 import useAlert from "./Alert/useAlert";
 
 const Clients = () => {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
   const { showAlert, Alert } = useAlert();
-  // const [clientsList, setClientsList] = useState();
   const [dataSource, setDataSource] = useState([]);
+  const [total, setTotal] = useState();
   const [loading, setLoading] = useState(false);
   const clientType = {
     1: "Individual",
@@ -20,19 +22,7 @@ const Clients = () => {
 const clientStatus = {
   0: "Inactive",
   1: "Active",
-  2: "Deleted"
 }
-  const paginationConfig = {
-    pageSize: 10, // Number of items per page
-    current: currentPage,
-    onChange: (page) => setCurrentPage(page),
-  };
-  // Calculate the start and end index for the current page
-  const startIndex = (currentPage - 1) * paginationConfig.pageSize;
-  const endIndex = startIndex + paginationConfig.pageSize;
-
-  // Slice the data array to display only the current page's data
-  const currentPageData = dataSource.slice(startIndex, endIndex);
   const columns = [
     {
       title: "Client Name",
@@ -63,19 +53,26 @@ const clientStatus = {
       title: 'Action',
       key: 'action',
       render: (_, record) => (
-        <Space size="middle">
-          <Link to={`/clientData/${record.key}`} className="">Edit</Link>
+        <>
+        <Space size="middle" className="mr-4">
+          <button onClick={() => editClient(record)} className="">
+              <EditFilled />
+          </button>
         </Space>
+        <Space size="middle">
+            <button onClick={() => deleteClient(record)} className="">
+              <DeleteFilled />
+            </button>
+        </Space></>
       ),
     },
   ];
-  const getClientsList = async () => {
+  const getClientsList = async (page, pageSize) => {
     setLoading(true);
-    await getClients()
-      .then(response => response.data)
-      .then((responseJson) => 
+    await getClients({perPage: pageSize, pageNumber:page})
+      .then(response => 
       {
-        const results= responseJson.map(row => ({
+        const results= (response.data).map(row => ({
           key: row._id,
           name: row.name,
           client_type: clientType[row.client_type],
@@ -84,15 +81,28 @@ const clientStatus = {
           contact: row.contact_person.phone,
         }))
         setDataSource(results);
+        setTotal(response.total);
         setLoading(false);
       })
       .catch(() => showAlert("Oops! No data found!", "error", 8000));
   };
+
+  const deleteClient = async (client) => {
+    updateClient(client.key, {
+      status: 2,
+    })
+      .then(() => getClientsList(),
+      setLoading(false))
+      .catch(() => showAlert("Oops! unable to delete client!", "error", 8000));
+  };
   function createNew() {
     navigate("/clientData");
   }
+  const editClient = async (client) => {
+    navigate(`/clientData/${client.key}`);
+  };
   useEffect(() => {
-    getClientsList();
+    getClientsList(1, 10);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -133,62 +143,17 @@ const clientStatus = {
             <Table
               loading={loading}
               columns={columns}
-              dataSource={currentPageData}
+              dataSource={dataSource}
               bordered
               className="mb-4"
-              pagination={false}
+              pagination={{
+                total: total,
+                onChange: (page, pageSize) => {
+                  getClientsList(page, pageSize);
+                },
+              }}
             ></Table>
-            <Pagination className="float-right" {...paginationConfig} total={dataSource.length} />
           </div>
-          {/* <div className="relative overflow-x-auto shadow-z1 sm:rounded-lg">
-            <table className="w-full text-left rtl:text-right text-gray-900">
-              <thead
-                className="text-300 text-gray-600"
-                style={{ backgroundColor: "#cccccc" }}
-              >
-                <tr>
-                  <th scope="col" className="px-6 py-3">
-                    Client Name
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Type
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Status
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Contact
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    Email
-                  </th>
-                  <th scope="col" className="px-6 py-3">
-                    <span className="sr-only">Edit</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {clientsList.map((item) => (
-                  <tr
-                    className="border-b border-gray-10 text-gray-900 bg-white border-gray-700 text-300 hover:bg-gray-100"
-                    key={item?._id}
-                  >
-                    <td className="px-6 py-4">{item?.name}</td>
-                    <td className="px-6 py-4">{item?.client_type}</td>
-                    <td className="px-6 py-4">{item?.status}</td>
-                    <td className="px-6 py-4">{item?.contact_person?.phone}</td>
-                    <td className="px-6 py-4">{item?.contact_person?.email}</td>
-                    <td className="px-6 py-4 text-right underline">
-                      <Link to={`/clientData/${item?._id}`} className="">
-                        Edit
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <Alert></Alert>
-          </div> */}
         </>
       )}
     </>

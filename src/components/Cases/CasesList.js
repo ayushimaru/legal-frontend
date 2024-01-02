@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
-import { getAllCases } from "../../services/api/useUser";
-import { useNavigate, Link } from "react-router-dom";
+import { getAllCases, updateCase } from "../../services/api/useUser";
+import { useNavigate } from "react-router-dom";
 import '../../index.css';
 import nodata from "../../assets/nodata.svg";
-import { Table, Pagination, Space } from "antd";
+import { Table, Space } from "antd";
+import { DeleteFilled, EditFilled } from '@ant-design/icons';
 import useAlert from "../Alert/useAlert";
 
 const Cases = () => {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
+  const [total, setTotal] = useState();
   const { showAlert, Alert } = useAlert();
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,26 +41,15 @@ const Cases = () => {
   const caseStatus = {
     0: "Inactive",
     1: "Active",
-    2: "Deleted",
   };
-  const paginationConfig = {
-    pageSize: 10, // Number of items per page
-    current: currentPage,
-    onChange: (page) => setCurrentPage(page),
-  };
-  // Calculate the start and end index for the current page
-  const startIndex = (currentPage - 1) * paginationConfig.pageSize;
-  const endIndex = startIndex + paginationConfig.pageSize;
-
-  // Slice the data array to display only the current page's data
-  const currentPageData = dataSource.slice(startIndex, endIndex);
+  
   const columns = [
     {
       title: "Title",
       dataIndex: "title",
       key: "title",
       fixed: "left",
-      width: 100,
+      width: 150,
     },
     {
       title: "Description",
@@ -133,37 +123,43 @@ const Cases = () => {
       fixed: "right",
       width: 150,
       render: (_, record) => (
-        <Space size="middle">
-          <Link to={`/caseData/${record.key}`} className="">
-            Edit
-          </Link>
-        </Space>
+        <>
+            <Space size="middle" className="mr-4">
+                <button onClick={() => editCase(record.key)} className="">
+                    <EditFilled />
+                </button>
+            </Space>
+            <Space size="middle">
+                <button onClick={() => deleteCase(record.key)} className="">
+                    <DeleteFilled />
+                </button>
+            </Space>
+        </>
       ),
     },
   ];
-  const getCasesList = async () => {
+  const getCasesList = async (page, pageSize) => {
     setLoading(true);
-    await getAllCases()
-      .then((response) => response.data)
-      .then((responseJson) => {
-        console.log(responseJson);
-        const results = responseJson.map((row) => ({
-          key: row._id,
-          title: row.title,
-          Description: row.Description,
-          case_type: caseType[row.case_type],
-          oppositionName: row.opposition.name,
-          oppositionContact: row.opposition.phone,
-          oppositionEmail: row.opposition.email,
-          oppositionLawyerEmail: row.opposition_lawyer.email,
-          oppositionLawyer: row.opposition_lawyer.name,
-          oppositionLawyerContact: row.opposition_lawyer.phone,
-          status: caseStatus[row.status],
-          oppType: oppositiontype[row.opposition.type],
-          courtType: courtType[row.court_type],
-        }));
-        console.log(results);
+    await getAllCases({perPage: pageSize, pageNumber:page})
+      .then(response => 
+      {
+        const results= (response.data).map(row => ({
+            key: row._id,
+            title: row.title,
+            Description: row.Description,
+            case_type: caseType[row.case_type],
+            oppositionName: row.opposition.name,
+            oppositionContact: row.opposition.phone,
+            oppositionEmail: row.opposition.email,
+            oppositionLawyerEmail: row.opposition_lawyer.email,
+            oppositionLawyer: row.opposition_lawyer.name,
+            oppositionLawyerContact: row.opposition_lawyer.phone,
+            status: caseStatus[row.status],
+            oppType: oppositiontype[row.opposition.type],
+            courtType: courtType[row.court_type],
+        }))
         setDataSource(results);
+        setTotal(response.total);
         setLoading(false);
       })
       .catch(() => showAlert("Oops! No data found!", "error", 8000));
@@ -171,8 +167,21 @@ const Cases = () => {
   function createNew() {
     navigate("/caseData");
   }
+  function editCase(id) {
+    navigate(`/caseData/${id}`);
+  }
+  async function deleteCase(id) {
+    setLoading(true);
+    await updateCase(id, {
+        status: 2,
+      })
+        .then(() => getCasesList(),
+        setLoading(false))
+        .catch(() => showAlert("Oops! unable to delete case!", "error", 8000));
+  }
+  
   useEffect(() => {
-    getCasesList();
+    getCasesList(1, 10);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -213,19 +222,17 @@ const Cases = () => {
             <Table
               loading={loading}
               columns={columns}
-              dataSource={currentPageData}
+              dataSource={dataSource}
               bordered
+              scroll={{ x: 1000 }}
               className="mb-4"
-              scroll={{
-                x: 1300,
+              pagination={{
+                total: total,
+                onChange: (page, pageSize) => {
+                  getCasesList(page, pageSize);
+                },
               }}
-              pagination={false}
             ></Table>
-            <Pagination
-              className="float-right"
-              {...paginationConfig}
-              total={dataSource.length}
-            />
           </div>
         </>
       )}
