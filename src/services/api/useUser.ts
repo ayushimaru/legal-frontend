@@ -41,7 +41,7 @@ export const getClients = async () => {
 };
 export const createNewClient = async (requestBody: any) => {
   try {
-    requestBody.customer_code = customerCode;
+    requestBody.customer_code = window.sessionStorage.getItem("customerCode") || "";
     const client = await postApiV1Client(authToken, requestBody);
     return client;
   } catch (error: any) {
@@ -108,7 +108,7 @@ export const getAllCases = async () => {
 };
 // add new case
 export const addNewCase = async (requestBody: any) => {
-  requestBody.customer_code = customerCode;
+  requestBody.customer_code = window.sessionStorage.getItem("customerCode") || "";
   try {
     await postApiV1Case(authToken, requestBody);
   } catch (error: any) {
@@ -157,7 +157,7 @@ export const getAllDocuments = async (pageData: any) => {
 
 export const addNewDocument = async (formData: any) => {
   try {
-    formData.customer_code = customerCode;
+    formData.customer_code = window.sessionStorage.getItem("customerCode") || "";
     const data = await postApiV1Document(authToken, formData);
     return data;
   } catch (error: any) {
@@ -233,7 +233,7 @@ export const deleteNote = async (id: any) => {
 // deleteNote
 export const createNewNote = async (requestBody: any) => {
   try {
-    requestBody.customer_code = customerCode;
+    requestBody.customer_code = window.sessionStorage.getItem("customerCode") || "";
     const data = await postApiV1Note(authToken, requestBody);
     return data;
   } catch (error: any) {
