@@ -13,7 +13,7 @@ const useAuthToken = () => {
 
   const setAuthToken = (newToken: string) => {
     // Set token logic, this can be storing it in local storage or making an API call
-    Cookies.set('authToken', newToken, { secure: true });
+    Cookies.set('authToken', newToken, { secure: false, });
     setToken(newToken);
   };
 
