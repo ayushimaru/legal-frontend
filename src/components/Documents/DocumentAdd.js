@@ -113,7 +113,7 @@ const DocumentAdd = () => {
     if (!values.title) {
       errors.title = "Document title is required";
     }
-    if (!values.document) {
+    if (!isEdit && !values.document) {
       errors.file = "Document is required";
     }
     if (!caseId && !values.case_id) {
