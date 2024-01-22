@@ -3,12 +3,19 @@ import useAuthToken from "../hooks/useAuthToken";
 import { loginUser, forgotPassword, resetPassword } from "../services/api/useUser";
 import { useLocation, useNavigate } from "react-router-dom";
 import cover from "../assets/image-cover.webp";
+import { EyeFilled, EyeInvisibleFilled } from "@ant-design/icons";
 import lawFirm from "../assets/lawFirm-illustration.svg";
 import Cookies from "js-cookie";
+import useAlert from "../components/Alert/useAlert";
 
 const Login = () => {
   const initialValues = { email: "", password: "", customerCodeValue: "" };
   const { setAuthToken } = useAuthToken();
+  const { showAlert, Alert } = useAlert();
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+  };
   const [formValues, setFormValues] = useState(initialValues);
   const [formErrors, setFormErrors] = useState({});
   const [isSubmit, setIsSubmit] = useState(false);
@@ -35,7 +42,7 @@ const Login = () => {
     })
       .then((response) => 
       Promise.all(setAuthToken(response.token), navigate("/clients")))
-      .catch((error) => '');
+      .catch(() => showAlert("Opps! Login Failed, please try again", "error", 8000));
   };
   const forgetPassword = () => {
     setIsForgotPassword(true);
@@ -59,16 +66,16 @@ const Login = () => {
         Cookies.set('resetPwdKey', response.key),
         setResetPwd(true)
       )
-      .catch((error) => '');
+      .catch(() => showAlert("Opps! reset password failed, please try again", "error", 8000));
   }
   const handleResetPassword = () => {
     resetPassword({password: formValues.password})
-      .then((response) => 
+      .then(() => 
         Cookies.remove('resetPwdKey'),
         setResetPwd(false),
         setIsForgotPassword(false)
       )
-      .catch((error) => '');
+      .catch(() => showAlert("Opps! reset password failed, please try again", "error", 8000));
   }
   useEffect(() => {
     if (Object.keys(formErrors).length === 0 && isSubmit) {
@@ -77,7 +84,6 @@ const Login = () => {
   }, [formErrors, isSubmit]);
 
   const validate = (values) => {
-    // const errors = {};
     const emailRegex = /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/i;
     if (!values.email) {
       formErrors.email = "Email is required";
@@ -102,7 +108,7 @@ const Login = () => {
                 <p className="text-300 text-center font-bold mb-5">No worries! Please enter your email address associated with your account.</p>
                 <div className="mb-5">
                     <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Your email</label>
-                    <input type="email" name="email" value={formValues.email} required onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5" placeholder="name@lawCase.com" />
+                    <input type="email" name="email" value={formValues.email} required onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5" placeholder="name@casack.com" />
                     <p className="text-red-400">{formErrors.email}</p>
                 </div>
                 <div className="flex flex-row justify-between">
@@ -126,10 +132,10 @@ const Login = () => {
         )}
         {(!isForgotPassword && !resetPwd) && (
             <form className="bg-white p-5 max-w-2xl w-full mx-auto rounded-2xl shadow-z1">
-                <p className="text-500 text-center font-bold mb-5">LOGIN TO LAWCASE</p>
+                <p className="text-500 text-center font-bold mb-5">LOGIN TO CASACK</p>
                 <div className="mb-5">
                     <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Your email</label>
-                    <input type="email" name="email" value={formValues.email} required onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5" placeholder="name@lawCase.com" />
+                    <input type="email" name="email" value={formValues.email} required onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5" placeholder="name@casack.com" />
                     <p className="text-red-400">{formErrors?.email}</p>
                 </div>
                 {
@@ -142,7 +148,14 @@ const Login = () => {
                 }
                 <div className="mb-5">
                     <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Your Password</label>
-                    <input type="password" name="password" value={formValues.password} required onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5" placeholder="password" />
+                    <input type={passwordVisible ? 'text' : 'password'} name="password" value={formValues.password} required onChange={handleChange} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5" placeholder="password" />
+                    { passwordVisible && 
+                      <EyeInvisibleFilled className="relative m-auto mr-[10px] float-right top-[-30px]" onClick={togglePasswordVisibility}/>
+                    }
+                    {
+                      !passwordVisible && 
+                      <EyeFilled className="relative m-auto mr-[10px] float-right top-[-30px]" onClick={togglePasswordVisibility}/>
+                    }
                     <p className="text-red-400">{formErrors.password}</p>
                 </div>
                 <div className="flex flex-row justify-between">
@@ -156,7 +169,7 @@ const Login = () => {
         
       </section>
       <section className="justify-center pb-[200px] align-center flex-2 relative flex flex-col justify-center overflow-hidden px-32 py-10 bg-white">
-        <div className="text-700 font-bold">Welcome to LawCase</div>
+        <div className="text-700 font-bold">Welcome to Casack</div>
         <em className="text-400 mb-12">(Streamline Your Legal Practice with LegalEase, the Ultimate Law Firm Management Software)</em>
         <ul className="mb-20">
             <li className="mb-6 text-400">Streamline case organization, track progress, and manage deadlines with a user-friendly dashboard.</li>
@@ -165,6 +178,7 @@ const Login = () => {
         </ul>
         <img alt="illustration" className="absolute w-96 h-auto bottom-0 right-0 " src={lawFirm}></img>
       </section>
+      <Alert></Alert>
     </div>
   );
 };

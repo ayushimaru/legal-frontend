@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
-import { getAllDocuments, getAccessDocument, deleteDocument } from "../../services/api/useUser";
+import {
+  getAllDocuments,
+  getAccessDocument,
+  deleteDocument,
+} from "../../services/api/useUser";
 import { useNavigate } from "react-router-dom";
-import '../../index.css'; 
-import  nodata  from "../../assets/nodata.svg";
-import { Table, Space } from "antd";
+import "../../index.css";
+import nodata from "../../assets/nodata.svg";
+import { Table, Space, Popconfirm } from "antd";
 import useAlert from "../Alert/useAlert";
-import { DeleteFilled, EditFilled, EyeFilled } from '@ant-design/icons';
+import {
+  DeleteFilled,
+  EditFilled,
+  EyeFilled,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
 
 const Documents = () => {
   const navigate = useNavigate();
@@ -13,7 +22,7 @@ const Documents = () => {
   const [dataSource, setDataSource] = useState([]);
   const [total, setTotal] = useState();
   const [loading, setLoading] = useState(false);
-  
+
   const columns = [
     {
       title: "Title",
@@ -31,63 +40,82 @@ const Documents = () => {
       key: "caseTitle",
     },
     {
-      title: 'Action',
-      key: 'action',
+      title: "Action",
+      key: "action",
       render: (_, record) => (
         <>
-            <Space size="middle" className="mr-4">
-                <button onClick={() => accessDocument(record.key)} className="">
-                    <EyeFilled />
-                </button>
-            </Space>
-            <Space size="middle" className="mr-4">
-                <button onClick={() => editDocument(record.key)} className="">
-                    <EditFilled />
-                </button>
-            </Space>
-            <Space size="middle">
-                <button onClick={() => deleteDocumentByID(record.key)} className="">
-                    <DeleteFilled />
-                </button>
-            </Space></>
+          <Space size="middle" className="mr-4">
+            <button onClick={() => accessDocument(record.key)} className="">
+              <EyeFilled />
+            </button>
+          </Space>
+          <Space size="middle" className="mr-4">
+            <button onClick={() => editDocument(record.key)} className="">
+              <EditFilled />
+            </button>
+          </Space>
+          <Space size="middle">
+            <Popconfirm
+              onConfirm={() => deleteDocumentByID(record.key)}
+              okText="Delete"
+              title="Are you sure to delete this case?"
+              cancelButtonProps={{ className: "custom-button-hover-sec" }}
+              okButtonProps={{
+                className:
+                  "bg-gray-900 hover: bg-black !important custom-button-hover",
+              }}
+              icon={
+                <QuestionCircleOutlined
+                  style={{
+                    color: "red",
+                  }}
+                />
+              }
+            >
+              <button>
+                <DeleteFilled />
+              </button>
+            </Popconfirm>
+          </Space>
+        </>
       ),
     },
   ];
   const getDocumentsList = async (page, pageSize) => {
     setLoading(true);
-    await getAllDocuments({perPage: pageSize, pageNumber:page})
-      .then(response => 
-      {
-        const results= (response.data).map(row => ({
+    await getAllDocuments({ perPage: pageSize, pageNumber: page })
+      .then((response) => {
+        const results = response.data.map((row) => ({
           key: row._id,
           title: row.title,
           caseTitle: row.case_title,
           note: row.note,
-        }))
+        }));
         setDataSource(results);
         setTotal(response.total);
         setLoading(false);
       })
       .catch(() => showAlert("Oops! No data found!", "error", 8000));
   };
-async function deleteDocumentByID(id) {
+  async function deleteDocumentByID(id) {
     setLoading(true);
     await deleteDocument(id)
       .then(() => {
         getDocumentsList();
         setLoading(false);
       })
-      .catch(() => showAlert("Oops! Unable to delete document!", "error", 8000));
+      .catch(() =>
+        showAlert("Oops! Unable to delete document!", "error", 8000)
+      );
   }
   const editDocument = (key) => {
     navigate(`/documentData/${key}`);
-  }
+  };
   async function accessDocument(id) {
     setLoading(true);
     await getAccessDocument(id)
-      .then(response => 
-      {
-        window.open(response.url, '_blank');
+      .then((response) => {
+        window.open(response.url, "_blank");
         setLoading(false);
       })
       .catch(() => showAlert("Oops! No data found!", "error", 8000));
@@ -98,7 +126,7 @@ async function deleteDocumentByID(id) {
   }
   useEffect(() => {
     getDocumentsList(1, 10);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

@@ -14,9 +14,11 @@ function Protected(props){
     }, [navigate, authToken])
     
     return(
-        <><SideBar /><div className="p-6 sm:ml-64">
-            <Component />
-        </div></>
+        <><SideBar />
+            <div className="p-6 sm:ml-64">
+                <Component /> 
+            </div>
+        </>
     ) 
 }
 

@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { DeleteFilled, EditFilled, EyeFilled } from '@ant-design/icons';
+import {
+  DeleteFilled,
+  EditFilled,
+  EyeFilled,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
 import {
   updateCase,
   getClients,
@@ -12,9 +17,9 @@ import {
   createNewNote,
   updateNote,
   deleteNote,
-  deleteDocument
+  deleteDocument,
 } from "../../services/api/useUser";
-import { Table, Space, Modal, List, Skeleton } from "antd";
+import { Table, Space, Modal, List, Skeleton, Popconfirm } from "antd";
 import useAlert from "../Alert/useAlert";
 import { useNavigate } from "react-router-dom";
 
@@ -42,24 +47,24 @@ const CasesAdd = () => {
     court_type: "",
     client_id: "",
     opposition: {
-        address: "",
-        email: "",
-        name: "",
-        phone: "",
-        type: "",
+      address: "",
+      email: "",
+      name: "",
+      phone: "",
+      type: "",
     },
     opposition_lawyer: {
-        address: "",
-        email: "",
-        name: "",
-        phone: "",
+      address: "",
+      email: "",
+      name: "",
+      phone: "",
     },
   };
   const showModal = (type, note) => {
     switch (type) {
       case "add":
         setIsNoteAdd(true);
-        setNote('');
+        setNote("");
         break;
       case "view":
         setIsNoteView(true);
@@ -96,37 +101,33 @@ const CasesAdd = () => {
             setIsNoteView(false);
             setIsNoteEdit(false);
             setNoteId(null);
-            setNote('');
+            setNote("");
             setOpen(false);
             setConfirmLoading(false);
           }, 2000)
         )
-        .catch(() =>
-          showAlert("Oops! Create case failed!", "error", 8000)
-        );
+        .catch(() => showAlert("Oops! Edit note failed!", "error", 8000));
     }
     if (isNoteAdd) {
-        setConfirmLoading(true);
-        createNewNote({
-          note: note,
-          case_id: id,
-        })
-          .then(() =>
-            setTimeout(() => {
-              getNotesList();
-              setIsNoteAdd(false);
-              setIsNoteView(false);
-              setIsNoteEdit(false);
-              setNoteId(null);
-              setNote('');
-              setOpen(false);
-              setConfirmLoading(false);
-            }, 2000)
-          )
-          .catch((error) =>
-            showAlert("Oops! Create case failed!", "error", 8000)
-          );
-      }
+      setConfirmLoading(true);
+      createNewNote({
+        note: note,
+        case_id: id,
+      })
+        .then(() =>
+          setTimeout(() => {
+            getNotesList();
+            setIsNoteAdd(false);
+            setIsNoteView(false);
+            setIsNoteEdit(false);
+            setNoteId(null);
+            setNote("");
+            setOpen(false);
+            setConfirmLoading(false);
+          }, 2000)
+        )
+        .catch(() => showAlert("Oops! Create note failed!", "error", 8000));
+    }
   };
   const columns = [
     {
@@ -155,9 +156,27 @@ const CasesAdd = () => {
             </button>
           </Space>
           <Space size="middle">
-            <button onClick={() => deleteDocumentByID(record.key)} className="">
-              <DeleteFilled />
-            </button>
+            <Popconfirm
+              onConfirm={() => deleteDocumentByID(record.key)}
+              okText="Delete"
+              title="Are you sure to delete this document?"
+              cancelButtonProps={{ className: "custom-button-hover-sec" }}
+              okButtonProps={{
+                className:
+                  "bg-gray-900 hover: bg-black !important custom-button-hover",
+              }}
+              icon={
+                <QuestionCircleOutlined
+                  style={{
+                    color: "red",
+                  }}
+                />
+              }
+            >
+              <button>
+                <DeleteFilled />
+              </button>
+            </Popconfirm>
           </Space>
         </>
       ),
@@ -191,29 +210,44 @@ const CasesAdd = () => {
     { key: 7, value: "Intellectual Property Case" },
     { key: 8, value: "Tax Cases" },
   ];
+  function hasNonEmptyValues(obj) {
+    for (const key in obj) {
+      if (obj[key].trim() !== "") {
+        return true; // Found a non-empty value
+      }
+    }
+    return false; // No non-empty values found
+  }
 
   const createCase = () => {
-    addNewCase({
+    const params = {
       Description: formValues.Description,
       case_type: Number(formValues.case_type),
       client_id: formValues.client_id,
       court_type: Number(formValues.court_type),
       status: Number(formValues.status),
       title: formValues.title,
-      opposition: {
-        address: formValues.opposition.address,
-        email: formValues.opposition.email,
-        name: formValues.opposition.name,
-        phone: formValues.opposition.phone,
-        type: Number(formValues.opposition.type),
-      },
-      opposition_lawyer: {
-        address: formValues.opposition_lawyer.address,
-        email: formValues.opposition_lawyer.address,
-        name: formValues.opposition_lawyer.name,
-        phone: formValues.opposition_lawyer.phone,
-      },
-    })
+    };
+    if (hasNonEmptyValues(formValues.opposition)) {
+      const filteredOpposition = Object.fromEntries(
+        Object.entries(formValues.opposition).filter(
+          ([key, value]) => value !== ""
+        )
+      );
+      if (filteredOpposition["type"]) {
+        filteredOpposition["type"] = Number(filteredOpposition["type"]);
+      }
+      params["opposition"] = filteredOpposition;
+    }
+    if (hasNonEmptyValues(formValues.opposition_lawyer)) {
+      const filteredOppositionLawyer = Object.fromEntries(
+        Object.entries(formValues.opposition_lawyer).filter(
+          ([key, value]) => value !== ""
+        )
+      );
+      params["opposition_lawyer"] = filteredOppositionLawyer;
+    }
+    addNewCase(params)
       .then(() => navigate("/cases"))
       .catch((error) => showAlert("Oops! Create case failed!", "error", 8000));
   };
@@ -242,11 +276,13 @@ const CasesAdd = () => {
         getDocumentsList();
         setLoading(false);
       })
-      .catch(() => showAlert("Oops! Unable to delete document!", "error", 8000));
+      .catch(() =>
+        showAlert("Oops! Unable to delete document!", "error", 8000)
+      );
   }
   const editDocument = (key) => {
     navigate(`/documentData/${key}`, { state: { id } });
-  }
+  };
 
   const updateClientWithId = () => {
     const editedChanges = findChanges(caseDetail, formValues);
@@ -259,7 +295,7 @@ const CasesAdd = () => {
     updated.case_type = Number(updated.case_type);
     updated.court_type = Number(updated.court_type);
     updated.status = Number(updated.status);
-    updated.opposition.type = Number(updated.opposition.type);
+    updated.opposition.type = Number(updated.opposition?.type);
     for (const key in updated) {
       const editedValue = updated[key];
       const originalValue = original[key];
@@ -315,7 +351,8 @@ const CasesAdd = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if(Object.keys(validate(formValues)).length) {
+    setLoading(true);
+    if (Object.keys(validate(formValues)).length) {
       setFormErrors(validate(formValues));
       return;
     }
@@ -324,9 +361,17 @@ const CasesAdd = () => {
     } else {
       createCase();
     }
+    setLoading(false);
   };
   const patchValue = (caseData) => {
     setCaseDetail(caseData);
+    if (!caseData.opposition) {
+      caseData.opposition = initialValues.opposition;
+    }
+
+    if (!caseData.opposition_lawyer) {
+      caseData.opposition_lawyer = initialValues.opposition_lawyer;
+    }
     const formData = {
       title: caseData.title,
       Description: caseData.Description,
@@ -335,36 +380,40 @@ const CasesAdd = () => {
       court_type: caseData.court_type,
       status: caseData.status.toString(),
       opposition: {
-        address: caseData.opposition?.address,
-        email: caseData.opposition?.email,
-        name: caseData.opposition?.name,
-        phone: caseData.opposition?.phone,
-        type: (caseData.opposition?.type).toString(),
+        address: caseData.opposition?.address || "",
+        email: caseData.opposition?.email || "",
+        name: caseData.opposition?.name || "",
+        phone: caseData.opposition?.phone || "",
+        type: (caseData.opposition?.type).toString() || "",
       },
       opposition_lawyer: {
-        address: caseData.opposition_lawyer?.address,
-        email: caseData.opposition_lawyer?.email,
-        name: caseData.opposition_lawyer?.name,
-        phone: caseData.opposition_lawyer?.phone,
+        address: caseData.opposition_lawyer?.address || "",
+        email: caseData.opposition_lawyer?.email || "",
+        name: caseData.opposition_lawyer?.name || "",
+        phone: caseData.opposition_lawyer?.phone || "",
       },
     };
     setFormValues(formData);
   };
   const getClientsList = async () => {
-    await getClients()
+    await getClients({})
       .then((response) => setClientsList(response.data))
-      .catch(() => "");
+      .catch(() =>
+        showAlert("Oops! Some issue occured, try again!", "error", 8000)
+      );
   };
   useEffect(() => {
+    setLoading(true);
     if (id) {
       setIsEdit(true);
       getCaseByID(id)
         .then((response) => patchValue(response.data))
-        .catch((error) => "");
+        .catch(() => showAlert("Oops! No case found!", "error", 8000));
       getDocumentsList();
       getNotesList();
     }
     getClientsList();
+    setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -425,7 +474,7 @@ const CasesAdd = () => {
             <div className="flex-1">
               <label
                 htmlFor="title"
-                className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+                className="block required-field mb-2 text-sm font-medium text-gray-900 text-300 "
               >
                 Title
               </label>
@@ -442,7 +491,7 @@ const CasesAdd = () => {
             <div className="flex-1">
               <label
                 htmlFor="Description"
-                className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+                className="block mb-2 required-field text-sm font-medium text-gray-900 text-300 "
               >
                 Description
               </label>
@@ -457,11 +506,11 @@ const CasesAdd = () => {
               <p className="text-red-400">{formErrors.Description}</p>
             </div>
           </div>
-          <div className="flex gap-2 mb-10 justify-between">
+          <div className="flex gap-2  mb-10 justify-between">
             <div className="flex-1">
               <label
                 htmlFor="status"
-                className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+                className="block mb-2 required-field text-sm font-medium text-gray-900 text-300 "
               >
                 Case Status
               </label>
@@ -478,7 +527,9 @@ const CasesAdd = () => {
                       name="status"
                       value={option.key}
                       className="w-4 h-4 text-gray-900 focus:ring-black ring-offset-gray-800 bg-white border-gray-600"
-                      checked={Number(formValues.status) === option.key}
+                      checked={
+                        isEdit ? Number(formValues.status) === option.key : null
+                      }
                       onChange={handleChange}
                     />
                     <label
@@ -495,7 +546,7 @@ const CasesAdd = () => {
             <div className="flex-1">
               <label
                 htmlFor="case_type"
-                className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+                className="block mb-2 required-field text-sm font-medium text-gray-900 text-300 "
               >
                 Case Type
               </label>
@@ -524,7 +575,7 @@ const CasesAdd = () => {
             <div className="flex-1">
               <label
                 htmlFor="client_id"
-                className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+                className="block mb-2 required-field text-sm font-medium text-gray-900 text-300 "
               >
                 Client
               </label>
@@ -534,6 +585,7 @@ const CasesAdd = () => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg  block w-full p-2.5 focus:ring-black focus:border-black"
                   value={formValues.client_id}
                   onChange={handleChange}
+                  required
                 >
                   <option value="" disabled>
                     Select Client
@@ -550,7 +602,7 @@ const CasesAdd = () => {
             <div className="flex-1">
               <label
                 htmlFor="clientCourt"
-                className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+                className="block mb-2 text-sm required-field font-medium text-gray-900 text-300 "
               >
                 Court Type
               </label>
@@ -652,17 +704,16 @@ const CasesAdd = () => {
                 </label>
                 <div className="flex">
                   {oppositionType.map((option) => (
-                    <div
-                      className="flex items-center me-4"
-                      key={option.key}
-                    >
+                    <div className="flex items-center me-4" key={option.key}>
                       <input
                         type="radio"
                         id={option.key}
                         name="opposition[type]"
                         value={option.key}
                         className="w-4 h-4 text-gray-900 focus:ring-black ring-offset-gray-800 bg-white border-gray-600"
-                        checked={Number(formValues.opposition.type) === option.key}
+                        checked={
+                          Number(formValues.opposition.type) === option.key
+                        }
                         onChange={handleChange}
                       />
                       <label
@@ -802,15 +853,38 @@ const CasesAdd = () => {
                 renderItem={(item) => (
                   <List.Item
                     actions={[
-                        <button onClick={() => showModal("view", item)}>
-                            <EyeFilled />
-                         </button>,
-                        <button onClick={() => showModal("edit", item)} className="">
-                            <EditFilled />
-                        </button>,
-                        <button onClick={() => deleteNoteByID(item._id)} className="">
-                            <DeleteFilled />
-                        </button>,
+                      <button onClick={() => showModal("view", item)}>
+                        <EyeFilled />
+                      </button>,
+                      <button
+                        onClick={() => showModal("edit", item)}
+                        className=""
+                      >
+                        <EditFilled />
+                      </button>,
+                      <Popconfirm
+                        onConfirm={() => deleteNoteByID(item._id)}
+                        okText="Delete"
+                        title="Are you sure to delete this note?"
+                        cancelButtonProps={{
+                          className: "custom-button-hover-sec",
+                        }}
+                        okButtonProps={{
+                          className:
+                            "bg-gray-900 hover: bg-black !important custom-button-hover",
+                        }}
+                        icon={
+                          <QuestionCircleOutlined
+                            style={{
+                              color: "red",
+                            }}
+                          />
+                        }
+                      >
+                        <button>
+                          <DeleteFilled />
+                        </button>
+                      </Popconfirm>,
                     ]}
                   >
                     <Skeleton
@@ -819,7 +893,9 @@ const CasesAdd = () => {
                       loading={item.loading}
                       active
                     >
-                        <p className="block mb-2 text-sm font-medium text-gray-900 text-300 overflow-hidden text-nowrap text-ellipsis">{item.note}</p>
+                      <p className="block mb-2 text-sm font-medium text-gray-900 text-300 overflow-hidden text-nowrap text-ellipsis">
+                        {item.note}
+                      </p>
                     </Skeleton>
                   </List.Item>
                 )}
@@ -832,6 +908,13 @@ const CasesAdd = () => {
       <Modal
         open={open}
         onOk={handleOk}
+        okButtonProps={{
+          className:
+            "bg-gray-900 hover: bg-black !important custom-button-hover",
+        }}
+        cancelButtonProps={{
+          className: "custom-button-hover-sec",
+        }}
         confirmLoading={confirmLoading}
         onCancel={handleCancel}
       >

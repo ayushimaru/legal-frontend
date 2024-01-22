@@ -8,6 +8,7 @@ import {
   updateDocumentById,
 } from "../../services/api/useUser";
 import { UploadOutlined } from "@ant-design/icons";
+import useAlert from "../Alert/useAlert";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const DocumentAdd = () => {
@@ -28,6 +29,7 @@ const DocumentAdd = () => {
   const [casesList, setCasesList] = useState();
   const [docData, setDocData] = useState();
   const fileInputRef = useRef(null);
+  const { showAlert, Alert } = useAlert();
   const caseId = state?.id;
 
   const createDocument = () => {
@@ -40,7 +42,7 @@ const DocumentAdd = () => {
       .then(() =>
         caseId ? navigate(`/caseData/${caseId}`) : navigate("/documents")
       )
-      .catch((error) => "");
+      .catch(() => showAlert("Oops! Not able to create document!", "error", 8000));
   };
   const updateDocumentWithId = () => {
     const editedChanges = findChanges(docData, formValues);
@@ -48,7 +50,7 @@ const DocumentAdd = () => {
       .then(() =>
         caseId ? navigate(`/caseData/${caseId}`) : navigate("/documents")
       )
-      .catch((error) => "");
+      .catch(() => showAlert("Oops! Not able to update document!", "error", 8000));
   };
 
   const findChanges = (original, updated) => {
@@ -70,9 +72,9 @@ const DocumentAdd = () => {
   };
 
   const getCasesList = async () => {
-    await getAllCases()
+    await getAllCases({})
       .then((response) => setCasesList(response.data))
-      .catch(() => "");
+      .catch(() => showAlert("Oops! Please try again!", "error", 8000));
   };
 
   const handleSubmit = (event) => {
@@ -104,7 +106,7 @@ const DocumentAdd = () => {
       setIsEdit(true);
       getDocumentById(id)
         .then((response) => patchValue(response.data))
-        .catch((error) => "");
+        .catch(() => showAlert("Oops! Document not found!", "error", 8000));
     }
   }, []);
 
@@ -144,7 +146,7 @@ const DocumentAdd = () => {
           <div className="flex-1">
             <label
               htmlFor="title"
-              className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+              className="block mb-2 required-field text-sm font-medium text-gray-900 text-300 "
             >
               Title
             </label>
@@ -180,7 +182,7 @@ const DocumentAdd = () => {
             <div className="flex-1">
               <label
                 htmlFor="case_id"
-                className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+                className="block required-field mb-2 text-sm font-medium text-gray-900 text-300 "
               >
                 Case
               </label>
@@ -209,7 +211,7 @@ const DocumentAdd = () => {
         {!isEdit && (
           <div className="w-full mb-8">
             <label
-              className="block mb-2 text-gray-900 text-300 font-medium text-black"
+              className="block mb-2 required-field text-gray-900 text-300 font-medium text-black"
               htmlFor="document"
             >
               Upload file
@@ -218,6 +220,7 @@ const DocumentAdd = () => {
               className="block w-full text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
               id="document"
               name="document"
+              required
               type="file"
               onChange={handleFileChange}
             />
@@ -265,6 +268,7 @@ const DocumentAdd = () => {
           {!isEdit ? "Add" : "Update"} Document
         </button>
       </form>
+      <Alert></Alert>
     </>
   );
 };

@@ -1,21 +1,27 @@
 import useAuthToken from "../../hooks/useAuthToken";
 import { logoutUserApi } from "../../services/api/useUser";
 import { useNavigate, NavLink } from "react-router-dom";
-import { FolderFilled, BookFilled, ContactsFilled, LogoutOutlined } from "@ant-design/icons";
+import {
+  FolderFilled,
+  BookFilled,
+  ContactsFilled,
+  LogoutOutlined,
+} from "@ant-design/icons";
 import Cookies from "js-cookie";
 
 const SideBar = () => {
   const { removeAuthToken } = useAuthToken();
   const navigate = useNavigate();
+
   const logoutUser = () => {
     logoutUserApi()
       .then(() => removeAuthToken())
-      .catch((error) => "");
-    navigate("login");
+      .catch((error) => console.log(error));
     Cookies.remove("customerCode");
+    navigate("/login");
   };
   return (
-    <>
+    <div>
       <button
         data-drawer-target="logo-sidebar"
         data-drawer-toggle="logo-sidebar"
@@ -45,20 +51,16 @@ const SideBar = () => {
         aria-label="Sidebar"
       >
         <div className="h-full px-3 py-4 overflow-y-auto bg-black">
-          <a
-            href="https://flowbite.com/"
-            className="flex items-center ps-2.5 mb-5"
+          <NavLink
+            className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group"
+            to={"/clients"}
           >
-            <img
-              src="https://flowbite.com/docs/images/logo.svg"
-              className="h-6 me-3 sm:h-7"
-              alt="Flowbite Logo"
-            />
-            <span className="self-center text-xl font-semibold whitespace-nowrap text-white">
-              Law Book
+            {" "}
+            <span className="self-center cursor-pointer text-[24px] font-semibold whitespace-nowrap text-white">
+              Casack
             </span>
-          </a>
-          <ul className="space-y-2 font-medium">
+          </NavLink>
+          <ul className="space-y-2 font-medium mt-2">
             {/* <li>
               <NavLink
                 className="flex items-center p-2 rounded-lg text-white hover:bg-gray-700 group"
@@ -152,7 +154,7 @@ const SideBar = () => {
           </ul>
         </div>
       </aside>
-    </>
+    </div>
   );
 };
 

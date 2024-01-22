@@ -6,10 +6,12 @@ import {
   getClientByID,
   updateClient,
 } from "../services/api/useUser";
+import useAlert from "./Alert/useAlert";
 import { useNavigate } from "react-router-dom";
 
 const ClientAdd = () => {
   const navigate = useNavigate();
+  const { showAlert, Alert } = useAlert();
   const { id } = useParams();
   const initialValues = {
     name: "",
@@ -49,13 +51,13 @@ const ClientAdd = () => {
       },
     })
       .then(() => navigate("/clients"))
-      .catch((error) => "");
+      .catch(() => showAlert("Oops! unable to create client!", "error", 8000));
   };
   const updateClientWithId = () => {
     const editedChanges = findChanges(clientData, formValues);
     updateClient(id, editedChanges)
       .then(() => navigate("/clients"))
-      .catch((error) => "");
+      .catch(() => showAlert("Oops! unable to update client!", "error", 8000));
   };
 
   const findChanges = (original, updated) => {
@@ -106,7 +108,7 @@ const ClientAdd = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if(Object.keys(validate(formValues)).length) {
+    if (Object.keys(validate(formValues)).length) {
       setFormErrors(validate(formValues));
       return;
     }
@@ -136,10 +138,8 @@ const ClientAdd = () => {
     if (id) {
       setIsEdit(true);
       getClientByID(id)
-        .then((response) =>
-          patchValue(response.data)
-        )
-        .catch((error) => "");
+        .then((response) => patchValue(response.data))
+        .catch(() => showAlert("Oops! unable to fetch client!", "error", 8000));
     }
   }, []);
 
@@ -171,7 +171,10 @@ const ClientAdd = () => {
     if (!values.contact_person.phone) {
       errors.contactPhone = "Phone number is required";
     }
-    if(values.contact_person.phone && !phoneRegex.test(values.contact_person.phone)) {
+    if (
+      values.contact_person.phone &&
+      !phoneRegex.test(values.contact_person.phone)
+    ) {
       errors.contactPhone = "Enter a valid phone number";
     }
     if (
@@ -196,7 +199,7 @@ const ClientAdd = () => {
           <div className="flex-1">
             <label
               htmlFor="name"
-              className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+              className="block mb-2 text-sm font-medium required-field text-gray-900 text-300 "
             >
               Client Name
             </label>
@@ -213,7 +216,7 @@ const ClientAdd = () => {
           <div className="flex-1">
             <label
               htmlFor="address"
-              className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+              className="block mb-2 text-sm font-medium required-field text-gray-900 text-300 "
             >
               Address
             </label>
@@ -233,7 +236,7 @@ const ClientAdd = () => {
           <div className="flex-1">
             <label
               htmlFor="status"
-              className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+              className="block mb-2 text-sm required-field font-medium text-gray-900 text-300 "
             >
               Client Status
             </label>
@@ -246,7 +249,9 @@ const ClientAdd = () => {
                     name="status"
                     value={option.key}
                     className="w-4 h-4 text-gray-900 focus:ring-black ring-offset-gray-800 bg-white border-gray-600"
-                    checked={Number(formValues.status) === option.key}
+                    checked={
+                      isEdit ? Number(formValues.status) === option.key : null
+                    }
                     onChange={handleStatusChange}
                   />
                   <label
@@ -263,7 +268,7 @@ const ClientAdd = () => {
           <div className="flex-1">
             <label
               htmlFor="client_type"
-              className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+              className="block mb-2 text-sm required-field font-medium text-gray-900 text-300 "
             >
               Client Type
             </label>
@@ -297,7 +302,7 @@ const ClientAdd = () => {
             <div className="flex-1">
               <label
                 htmlFor="contact_person[name]"
-                className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+                className="block mb-2 required-field text-sm font-medium text-gray-900 text-300 "
               >
                 Name
               </label>
@@ -314,7 +319,7 @@ const ClientAdd = () => {
             <div className="flex-1">
               <label
                 htmlFor="contact_person[email]"
-                className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+                className="block mb-2 text-sm required-field font-medium text-gray-900 text-300 "
               >
                 Email
               </label>
@@ -350,7 +355,7 @@ const ClientAdd = () => {
             <div className="flex-1">
               <label
                 htmlFor="contact_person[phone]"
-                className="block mb-2 text-sm font-medium text-gray-900 text-300 "
+                className="block mb-2 text-sm required-field font-medium text-gray-900 text-300 "
               >
                 Phone
               </label>
@@ -374,6 +379,7 @@ const ClientAdd = () => {
           {!isEdit ? "Add" : "Update"} Client
         </button>
       </form>
+      <Alert></Alert>
     </>
   );
 };

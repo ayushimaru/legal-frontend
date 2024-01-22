@@ -14,8 +14,6 @@ const { getApiV1Document, postApiV1Document, getApiV1AccessDocument, getApiV1Doc
 const { getApiV1Note, postApiV1Note, putApiV1Note, deleteApiV1Note } = NoteService;
 
 OpenAPI.BASE = "http://15.206.124.145";
-const customerCode = window.sessionStorage.getItem("customerCode") || "";
-const authToken = Cookies.get("authToken") || "";
 const resetPwdToken = Cookies.get("resetPwdKey") || "";
 
 export const loginUser = async (requestBody: any) => {
@@ -27,12 +25,21 @@ export const loginUser = async (requestBody: any) => {
   }
 };
 
-export const getClients = async () => {
+export const getClients = async (params: any) => {
   try {
     const customercode = window.sessionStorage.getItem("customerCode") || "";
     const data = await getApiV1Client(
       Cookies.get("authToken") || "",
-      customercode
+      customercode,
+      params['statusFilter'] >= 0 ||  params['statusFilter'] < 0 ? params['statusFilter'] : undefined,
+      params['clientType'] || undefined,
+      params['name'] || undefined,
+      params['contactPersonName'] || undefined,
+      params['addedBy'] || undefined,
+      params['perPage'] || undefined,
+      params['pageNumber'] || undefined,
+      params['sortBy'] || undefined,
+      params['order'] || undefined,
     );
     return data;
   } catch (error: any) {
@@ -42,7 +49,7 @@ export const getClients = async () => {
 export const createNewClient = async (requestBody: any) => {
   try {
     requestBody.customer_code = window.sessionStorage.getItem("customerCode") || "";
-    const client = await postApiV1Client(authToken, requestBody);
+    const client = await postApiV1Client(Cookies.get("authToken") || "", requestBody);
     return client;
   } catch (error: any) {
     throw new Error(error);
@@ -50,7 +57,7 @@ export const createNewClient = async (requestBody: any) => {
 };
 export const updateClient = async (id: string, requestBody: any) => {
   try {
-    const client = await putApiV1Client(id, authToken, requestBody);
+    const client = await putApiV1Client(id, Cookies.get("authToken") || "", requestBody);
     return client;
   } catch (error: any) {
     throw new Error(error);
@@ -58,7 +65,7 @@ export const updateClient = async (id: string, requestBody: any) => {
 };
 export const getClientByID = async (id: any) => {
   try {
-    const clientData = await getApiV1Client1(id, authToken);
+    const clientData = await getApiV1Client1(id, Cookies.get("authToken") || "");
     return clientData;
   } catch (error: any) {
     throw new Error(error);
@@ -68,7 +75,7 @@ export const getClientByID = async (id: any) => {
 //Logout User
 export const logoutUserApi = async () => {
   try {
-    const data = await deleteApiV1Login(authToken);
+    const data = await deleteApiV1Login(Cookies.get("authToken") || "");
     return data;
   } catch (error: any) {
     throw new Error(error);
@@ -95,11 +102,22 @@ export const resetPassword = async (requestBody: any) => {
 };
 
 // get all cases
-export const getAllCases = async () => {
+export const getAllCases = async (params: any) => {
   try {
     const data = await getApiV1Case(
       Cookies.get("authToken") || "",
-      window.sessionStorage.getItem("customerCode") || ""
+      window.sessionStorage.getItem("customerCode") || "",
+      params['clientId'] || undefined,
+      params['oppositionName'] || undefined,
+      params['oppositionLawyerName'] || undefined,
+      params['caseType'] || undefined,
+      params['courtType'] || undefined,
+      params['addedBy'] || undefined,
+      params['statusFilter'] >= 0 ||  params['statusFilter'] < 0 ? params['statusFilter'] : undefined,
+      params['perPage'] || undefined,
+      params['pageNumber'] || undefined,
+      params['sortBy'] || undefined,
+      params['order'] || undefined,
     );
     return data;
   } catch (error: any) {
@@ -110,7 +128,7 @@ export const getAllCases = async () => {
 export const addNewCase = async (requestBody: any) => {
   requestBody.customer_code = window.sessionStorage.getItem("customerCode") || "";
   try {
-    await postApiV1Case(authToken, requestBody);
+    await postApiV1Case(Cookies.get("authToken") || "", requestBody);
   } catch (error: any) {
     throw new Error(error);
   }
@@ -118,7 +136,7 @@ export const addNewCase = async (requestBody: any) => {
 
 export const getCaseByID = async (id: any) => {
   try {
-    const caseData = await getApiV1Case1(id, authToken);
+    const caseData = await getApiV1Case1(id, Cookies.get("authToken") || "");
     return caseData;
   } catch (error: any) {
     throw new Error(error);
@@ -127,7 +145,7 @@ export const getCaseByID = async (id: any) => {
 
 export const updateCase = async (id: string, requestBody: any) => {
   try {
-    const cases = await putApiV1Case(id, authToken, requestBody);
+    const cases = await putApiV1Case(id, Cookies.get("authToken") || "", requestBody);
     return cases;
   } catch (error: any) {
     throw new Error(error);
@@ -158,7 +176,7 @@ export const getAllDocuments = async (pageData: any) => {
 export const addNewDocument = async (formData: any) => {
   try {
     formData.customer_code = window.sessionStorage.getItem("customerCode") || "";
-    const data = await postApiV1Document(authToken, formData);
+    const data = await postApiV1Document(Cookies.get("authToken") || "", formData);
     return data;
   } catch (error: any) {
     throw new Error(error);
@@ -167,7 +185,7 @@ export const addNewDocument = async (formData: any) => {
 
 export const getAccessDocument = async (id: any) => {
   try {
-    const data = await getApiV1AccessDocument(id, authToken);
+    const data = await getApiV1AccessDocument(id, Cookies.get("authToken") || "");
     return data;
   } catch (error: any) {
     throw new Error(error);
@@ -175,7 +193,7 @@ export const getAccessDocument = async (id: any) => {
 };
 export const getDocumentById = async (id: any) => {
   try {
-    const data = await getApiV1Document1(id, authToken);
+    const data = await getApiV1Document1(id, Cookies.get("authToken") || "");
     return data;
   } catch (error: any) {
     throw new Error(error);
@@ -183,7 +201,7 @@ export const getDocumentById = async (id: any) => {
 };
 export const updateDocumentById = async (id: any, formData: any) => {
   try {
-    const data = await putApiV1Document(id, authToken, formData);
+    const data = await putApiV1Document(id, Cookies.get("authToken") || "", formData);
     return data;
   } catch (error: any) {
     throw new Error(error);
@@ -191,7 +209,7 @@ export const updateDocumentById = async (id: any, formData: any) => {
 };
 export const deleteDocument = async (id: any) => {
   try {
-    const data = await deleteApiV1Document(id, authToken);
+    const data = await deleteApiV1Document(id, Cookies.get("authToken") || "");
     return data;
   } catch (error: any) {
     throw new Error(error);
@@ -215,7 +233,7 @@ export const getAllNotes = async (pageData: any) => {
 // get all notes
 export const updateNote = async (id: any, requestBody: any) => {
   try {
-    const data = await putApiV1Note(id, authToken, requestBody);
+    const data = await putApiV1Note(id, Cookies.get("authToken") || "", requestBody);
     return data;
   } catch (error: any) {
     throw new Error(error);
@@ -224,7 +242,7 @@ export const updateNote = async (id: any, requestBody: any) => {
 // deleteNote
 export const deleteNote = async (id: any) => {
   try {
-    const data = await deleteApiV1Note(id, authToken);
+    const data = await deleteApiV1Note(id, Cookies.get("authToken") || "");
     return data;
   } catch (error: any) {
     throw new Error(error);
@@ -234,7 +252,7 @@ export const deleteNote = async (id: any) => {
 export const createNewNote = async (requestBody: any) => {
   try {
     requestBody.customer_code = window.sessionStorage.getItem("customerCode") || "";
-    const data = await postApiV1Note(authToken, requestBody);
+    const data = await postApiV1Note(Cookies.get("authToken") || "", requestBody);
     return data;
   } catch (error: any) {
     throw new Error(error);

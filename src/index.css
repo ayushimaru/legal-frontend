@@ -98,3 +98,16 @@ body{
   font-weight: 700 !important;
   font-size: 16px !important;
 }
+.custom-button-hover:hover {
+  background-color: black !important;
+}
+.custom-button-hover-sec:hover {
+  border-color: black !important;
+  color: #000000 !important;
+}
+.required-field::after {
+  content: '*';
+  color: red; /* Change the color as needed */
+  font-size: 16px;
+  margin-left: 4px; /* Adjust spacing as needed */
+}

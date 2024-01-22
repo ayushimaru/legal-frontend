@@ -14,9 +14,9 @@ function App() {
     <>
     <Router>
       <Routes>
-        <Route path="" element={<Login />} />
+        {/* <Route path="" element={<Login />} /> */}
         <Route path="login" element={<Login />} />
-        <Route path="/*" element={<Navigate to={"/"} />} />
+        <Route path="/*" element={<Protected Component={Clients} />} />
         <Route path="clients" element={<Protected Component={Clients} />} />
         <Route path="clientData" element={<Protected Component={ClientAdd} />} />
         <Route path="clientData/:id" element={<Protected Component={ClientAdd} />} />
