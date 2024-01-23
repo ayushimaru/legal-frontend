@@ -170,7 +170,7 @@ const Login = () => {
       </section>
       <section className="justify-center pb-[200px] align-center flex-2 relative flex flex-col justify-center overflow-hidden px-32 py-10 bg-white">
         <div className="text-700 font-bold">Welcome to Casack</div>
-        <em className="text-400 mb-12">(Streamline Your Legal Practice with LegalEase, the Ultimate Law Firm Management Software)</em>
+        <em className="text-400 mb-12">(Streamline Your Legal Practice with Casack, the Ultimate Law Firm Management Software)</em>
         <ul className="mb-20">
             <li className="mb-6 text-400">Streamline case organization, track progress, and manage deadlines with a user-friendly dashboard.</li>
             <li className="mb-6 text-400">Centralized repository, version control, and secure sharing for efficient document handling.</li>
